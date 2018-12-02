@@ -1,10 +1,20 @@
 {
   "name": "guppy",
   "productName": "Guppy",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
-  "main": "src/main.js",
+  "main": "src/electron.js",
   "homepage": "./",
+  "build": {
+    "appId": "com.electron.guppy",
+    "files": [
+      "build/**/*"
+    ],
+    "asarUnpack": [
+      "node_modules/yarn/"
+    ],
+    "publish": "github"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/joshwcomeau/guppy.git"
@@ -14,12 +24,10 @@
     "start": "cross-env NODE_ENV=development npm run start:react",
     "start:react": "cross-env BROWSER=none node scripts/start.js",
     "build": "node scripts/build.js",
-    "package:linux": "electron-packager . --platform=linux --prune=true --out=release-builds --overwrite",
-    "package:mac": "electron-packager . --platform=darwin --arch=x64 --icon=src/assets/icons/mac/logo.icns --prune=true --out=release-builds --overwrite",
-    "package:win": "electron-packager . --platform=win32 --arch=x64 --icon=src/assets/icons/win/logo.ico --prune=true --out=release-builds --overwrite",
-    "dist:linux": "cross-env GENERATE_SOURCEMAP=false npm run build && npm run package:linux",
-    "dist:mac": "cross-env GENERATE_SOURCEMAP=false npm run build && npm run package:mac",
-    "dist:win": "cross-env GENERATE_SOURCEMAP=false npm run build && npm run package:win",
+    "dist": "cross-env GENERATE_SOURCEMAP=false npm run build && electron-builder -c.extraMetadata.main=build/electron.js",
+    "dist:all": "cross-env GENERATE_SOURCEMAP=false npm run build && electron-builder -mwl -c.extraMetadata.main=build/electron.js",
+    "publish": "yarn dist --publish always",
+    "publish:all": "yarn dist:all --publish always",
     "test": "node scripts/test.js --env=node",
     "coverage": "yarn test --coverage",
     "report-coverage": "yarn coverage && codecov",
@@ -33,7 +41,7 @@
     "storybook": "start-storybook -p 9001 -c .storybook"
   },
   "lint-staged": {
-    "*.js": [
+    "*.{js,jsx,mjs}": [
       "npm run prettier",
       "eslint",
       "git add"
@@ -44,9 +52,11 @@
     "electron-debug": "2.0.0",
     "electron-devtools-installer": "2.2.4",
     "electron-store": "2.0.0",
+    "electron-updater": "3.1.2",
     "fix-path": "2.1.0",
     "gatsby-cli": "1.1.58",
     "ps-tree": "1.1.0",
+    "react-custom-scrollbars": "4.2.1",
     "rimraf": "2.6.2",
     "yarn": "1.9.2"
   },
@@ -60,11 +70,12 @@
     "async": "2.6.1",
     "autoprefixer": "7.2.5",
     "babel-core": "7.0.0-bridge.0",
-    "babel-eslint": "8.2.2",
+    "babel-eslint": "10.0.1",
     "babel-jest": "22.1.0",
     "babel-loader": "8.0.0-beta.0",
     "babel-plugin-named-asset-import": "1.0.0-next.66cc7a90",
     "babel-plugin-react-docgen": "2.0.0-babel7.0",
+    "babel-polyfill": "6.26.0",
     "babel-preset-react-app": "4.0.0-next.66cc7a90",
     "case-sensitive-paths-webpack-plugin": "2.1.1",
     "chalk": "2.4.1",
@@ -75,17 +86,18 @@
     "dotenv": "5.0.0",
     "dotenv-expand": "4.2.0",
     "electron": "2.0.1",
-    "electron-packager": "12.1.0",
-    "eslint": "4.15.0",
-    "eslint-config-react-app": "3.0.0-next.66cc7a90",
+    "electron-builder": "20.28.4",
+    "electron-log": "^2.2.17",
+    "eslint": "5.7.0",
+    "eslint-config-react-app": "3.0.4",
     "eslint-loader": "1.9.0",
-    "eslint-plugin-flowtype": "2.41.0",
-    "eslint-plugin-import": "2.8.0",
-    "eslint-plugin-jsx-a11y": "6.0.3",
-    "eslint-plugin-react": "7.7.0",
+    "eslint-plugin-flowtype": "3.0.0",
+    "eslint-plugin-import": "2.14.0",
+    "eslint-plugin-jsx-a11y": "6.1.2",
+    "eslint-plugin-react": "7.11.1",
     "extract-text-webpack-plugin": "3.0.2",
     "file-loader": "1.1.6",
-    "flow-bin": "0.73.0",
+    "flow-bin": "0.83.0",
     "foreman": "2.0.0",
     "fs-extra": "5.0.0",
     "graphql": "0.12.3",
@@ -100,11 +112,9 @@
     "loader-utils": "1.1.0",
     "mixpanel-browser": "2.22.4",
     "moment": "2.22.2",
-    "object-assign": "4.1.1",
     "postcss-flexbugs-fixes": "3.2.0",
     "postcss-loader": "2.0.10",
     "prettier": "1.13.7",
-    "promise": "8.0.1",
     "raf": "3.4.0",
     "random-seed": "0.3.0",
     "react": "16.3.2",
@@ -128,7 +138,6 @@
     "redux-storage-decorator-debounce": "1.1.3",
     "redux-storage-decorator-filter": "1.1.8",
     "redux-storage-decorator-migrate": "1.1.0",
-    "redux-thunk": "2.2.0",
     "reselect": "3.0.1",
     "resize-observer-polyfill": "1.5.0",
     "resolve": "1.6.0",
@@ -144,22 +153,9 @@
     "uuid": "3.3.2",
     "webpack": "3.10.0",
     "webpack-dev-server": "2.11.0",
-    "webpack-manifest-plugin": "1.3.2",
-    "whatwg-fetch": "2.0.3"
+    "webpack-manifest-plugin": "1.3.2"
   },
-  "browserslist": {
-    "development": [
-      "last 2 chrome versions",
-      "last 2 firefox versions",
-      "last 2 edge versions"
-    ],
-    "production": [
-      ">1%",
-      "last 4 versions",
-      "Firefox ESR",
-      "not ie < 11"
-    ]
-  },
+  "browserslist": "chrome 61",
   "jest": {
     "collectCoverageFrom": [
       "src/**/*.{js,jsx,mjs}"
